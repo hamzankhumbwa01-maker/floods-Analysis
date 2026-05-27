@@ -166,23 +166,84 @@ function NavBar({ active, setActive }) {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         minHeight: isMobile ? 56 : 64,
       }}>
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: isMobile ? 30 : 36, height: isMobile ? 30 : 36, borderRadius: "50%",
-            background: "linear-gradient(135deg,#3b82f6,#1e3a8a)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: isMobile ? 15 : 18, flexShrink: 0,
-          }}>💧</div>
-          <div>
-            <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: isMobile ? 11 : 13, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-              Lower Shire
-            </div>
-            <div style={{ color: "#64748b", fontSize: isMobile ? 9 : 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              Flood Risk 2026
-            </div>
-          </div>
-        </div>
+        {/* Logo / Animated Earth */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: isMobile ? 10 : 14,
+  }}
+>
+  
+  {/* Animated Video Globe */}
+  <div
+    style={{
+      width: isMobile ? 42 : 52,
+      height: isMobile ? 42 : 52,
+      borderRadius: "50%",
+      overflow: "hidden",
+      position: "relative",
+      border: "2px solid rgba(59,130,246,0.5)",
+      boxShadow: "0 0 18px rgba(59,130,246,0.45)",
+      flexShrink: 0,
+      background: "#020617",
+    }}
+  >
+    <video
+      autoPlay
+      muted
+      loop
+      playsInline
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+      }}
+    >
+      <source
+        src="https://hamza-nkhumbwa.github.io/datasets/earth.mp4"
+        type="video/mp4"
+      />
+    </video>
+
+    {/* Glow Overlay */}
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        background:
+          "linear-gradient(to bottom right, rgba(59,130,246,0.15), rgba(14,165,233,0.08))",
+      }}
+    />
+  </div>
+
+  {/* Text */}
+  <div style={{ lineHeight: 1.1 }}>
+    <div
+      style={{
+        color: "#f8fafc",
+        fontWeight: 800,
+        fontSize: isMobile ? 12 : 15,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+      }}
+    >
+      Lower Shire
+    </div>
+
+    <div
+      style={{
+        color: "#38bdf8",
+        fontSize: isMobile ? 9 : 11,
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        marginTop: 4,
+      }}
+    >
+      Flood Intelligence 2026
+    </div>
+  </div>
+</div>
 
         {/* Desktop nav */}
         {!isMobile && (
@@ -241,22 +302,31 @@ function HeroSection({ setActive }) {
   const isMobile = useIsMobile();
   return (
     <section style={{
-      background: "linear-gradient(180deg,#0a1628 0%,#0f1e3d 60%,#0a1628 100%)",
+      backgroundImage: "url('https://hamza-nkhumbwa.github.io/datasets/cyclone-freddy.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
       minHeight: isMobile ? "85vh" : "92vh",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       padding: isMobile ? "3rem 1.25rem" : "4rem 2rem",
       textAlign: "center", position: "relative", overflow: "hidden",
     }}>
+      {/* Dark overlay to keep text readable over the image */}
       <div style={{
-        position: "absolute", inset: 0, opacity: 0.04,
+        position: "absolute", inset: 0,
+        background: "linear-gradient(180deg,rgba(10,22,40,0.72) 0%,rgba(15,30,61,0.80) 55%,rgba(10,22,40,0.75) 100%)",
+      }} />
+      {/* Subtle grid overlay */}
+      <div style={{
+        position: "absolute", inset: 0, opacity: 0.03,
         backgroundImage: "linear-gradient(#3b82f6 1px,transparent 1px),linear-gradient(90deg,#3b82f6 1px,transparent 1px)",
         backgroundSize: isMobile ? "40px 40px" : "60px 60px",
       }} />
       <div style={{
         position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)",
         width: isMobile ? 300 : 600, height: isMobile ? 200 : 400, borderRadius: "50%",
-        background: "radial-gradient(ellipse,rgba(30,58,138,0.4) 0%,transparent 70%)",
+        background: "radial-gradient(ellipse,rgba(30,58,138,0.25) 0%,transparent 70%)",
         pointerEvents: "none",
       }} />
       <div style={{ position: "relative", maxWidth: 780, width: "100%" }}>
@@ -267,7 +337,7 @@ function HeroSection({ setActive }) {
           fontSize: isMobile ? 10 : 12, color: "#fca5a5", letterSpacing: "0.08em", textTransform: "uppercase",
         }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
-          Chikwawa District — March/April 2026
+          PartialChikwawa District — March/April 2026
         </div>
 
         <h1 style={{
@@ -328,8 +398,8 @@ function HeroSection({ setActive }) {
 function OverviewSection({ setActive }) {
   const isMobile = useIsMobile();
   const details = [
-    { label: "Study Area", value: "Chikwawa District, Lower Shire", icon: "📍" },
-    { label: "Analysis Period", value: "February – April 2026", icon: "📅" },
+    { label: "Study Area", value: "Chikwawa District, Lower Shire"  },
+    { label: "Analysis Period", value: "February – April 2026"},
     { label: "Satellite Data", value: "Sentinel-1, Sentinel-2, SRTM, CHIRPS", icon: "🛰" },
     { label: "Spatial Resolution", value: "30 metre pixels", icon: "🔍" },
     { label: "Risk Classes", value: "1 (Low) to 5 (Very High)", icon: "⚠️" },
@@ -659,29 +729,40 @@ function ConclusionSection() {
   const findings = [
     {
       title: "High-risk zone clearly defined",
-      body: "The compound flood risk analysis consistently identifies the Illovo corridor and adjacent Shire floodplain as the zone of greatest combined hazard and vulnerability. These areas sit at elevations below 100m, within 300m of major river channels, with slope values under 2°, and contain substantial population and built infrastructure. All seven AHP factors converge to assign maximum or near-maximum scores here.",
-      icon: "🎯",
+      body: "The compound flood risk analysis consistently identifies the Illovo corridor and adjacent Shire floodplain as the zone of greatest combined hazard and vulnerability. These areas sit at elevations below 100m, within 300m of major river channels, with slope values under 2°, and contain substantial population and built infrastructure. All seven AHP factors converge to assign maximum or near-maximum scores here."
     },
     {
       title: "Soil saturation amplified the 2026 event",
       body: "The temporal analysis of Soil Water Index confirms that by late March 2026, soils across the basin had reached near-complete saturation. This condition transformed even moderate rainfall into significant flood-generating episodes — rainfall that would ordinarily infiltrate converted almost entirely to surface runoff, driving the river levels that breached protective embankments near Chikwawa Town.",
-      icon: "💧",
+      
     },
     {
       title: "AHP methodology proves fit for purpose",
       body: "The Analytic Hierarchy Process provided a structured, defensible framework for combining incommensurable physical parameters. Elevation received the highest weight (22%) consistent with its dominant control on inundation potential. The consistency ratio was verified within the 0.10 threshold, confirming internal logical coherence.",
-      icon: "⚖️",
+     
     },
     {
       title: "Recommendations for risk reduction",
       body: "Priority interventions: (1) Early warning systems tied to SAR-derived soil moisture thresholds — SWI exceeding 0.7 should trigger evacuation preparedness; (2) Flood-resilient resettlement planning for the highest-risk zones around Illovo; (3) Maintaining riparian vegetation to buffer peak flows; (4) Infrastructure design that accounts for the 1-in-5-year inundation envelope.",
-      icon: "🛡",
+      
     },
   ];
 
   return (
-    <section style={{ background: "#060c18", padding: isMobile ? "2.5rem 1.25rem" : "4rem 2rem" }}>
-      <div style={{ maxWidth: 820, margin: "0 auto" }}>
+    <section style={{
+      backgroundImage: "url('https://hamza-nkhumbwa.github.io/datasets/floods.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      position: "relative",
+      padding: isMobile ? "2.5rem 1.25rem" : "4rem 2rem",
+    }}>
+      {/* Dark overlay for readability */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(180deg,rgba(6,12,24,0.88) 0%,rgba(6,12,24,0.82) 50%,rgba(6,12,24,0.92) 100%)",
+      }} />
+      <div style={{ maxWidth: 820, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ color: "#3b82f6", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
           Findings & Recommendations
         </div>
