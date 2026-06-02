@@ -136,7 +136,7 @@ const ahpMatrix = [
   { factor: "Soil Moisture", weight: 0.10, rank: 7 },
 ];
 
-const SECTIONS = ["Overview", "Maps", "Methodology", "Conclusion"];
+const SECTIONS = ["Overview", "Study Area", "Maps", "Methodology", "Conclusion"];
 
 /* ─── Responsive hook ─── */
 function useIsMobile() {
@@ -337,7 +337,7 @@ function HeroSection({ setActive }) {
           fontSize: isMobile ? 10 : 12, color: "#fca5a5", letterSpacing: "0.08em", textTransform: "uppercase",
         }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
-          PartialChikwawa District — March/April 2026
+          Chikwawa District — March/April 2026
         </div>
 
         <h1 style={{
@@ -364,6 +364,12 @@ function HeroSection({ setActive }) {
             borderRadius: 8, cursor: "pointer",
             fontSize: isMobile ? 13 : 14, fontWeight: 600,
           }}>View Maps →</button>
+          <button onClick={() => setActive("Study Area")} style={{
+            background: "rgba(59,130,246,0.18)", border: "1px solid rgba(59,130,246,0.45)",
+            color: "#93c5fd", padding: isMobile ? "10px 22px" : "12px 28px",
+            borderRadius: 8, cursor: "pointer",
+            fontSize: isMobile ? 13 : 14, fontWeight: 500,
+          }}>🗺 Study Area</button>
           <button onClick={() => setActive("Methodology")} style={{
             background: "transparent", border: "1px solid rgba(100,116,139,0.5)",
             color: "#94a3b8", padding: isMobile ? "10px 22px" : "12px 28px",
@@ -398,8 +404,8 @@ function HeroSection({ setActive }) {
 function OverviewSection({ setActive }) {
   const isMobile = useIsMobile();
   const details = [
-    { label: "Study Area", value: "Chikwawa District, Lower Shire"  },
-    { label: "Analysis Period", value: "February – April 2026"},
+    { label: "Study Area", value: "Chikwawa District, Lower Shire", icon: "📍" },
+    { label: "Analysis Period", value: "February – April 2026", icon: "📅" },
     { label: "Satellite Data", value: "Sentinel-1, Sentinel-2, SRTM, CHIRPS", icon: "🛰" },
     { label: "Spatial Resolution", value: "30 metre pixels", icon: "🔍" },
     { label: "Risk Classes", value: "1 (Low) to 5 (Very High)", icon: "⚠️" },
@@ -450,13 +456,19 @@ function OverviewSection({ setActive }) {
           </div>
         </div>
 
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
+        <div style={{ marginTop: "2rem", textAlign: "center", display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => setActive("Maps")} style={{
             background: "#1d4ed8", border: "none", color: "#fff",
             padding: isMobile ? "10px 24px" : "12px 32px",
             borderRadius: 8, cursor: "pointer",
             fontSize: isMobile ? 13 : 14, fontWeight: 600,
           }}>Explore All Maps →</button>
+          <button onClick={() => setActive("Study Area")} style={{
+            background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.4)",
+            color: "#93c5fd", padding: isMobile ? "10px 24px" : "12px 32px",
+            borderRadius: 8, cursor: "pointer",
+            fontSize: isMobile ? 13 : 14, fontWeight: 500,
+          }}>🗺 View Study Area</button>
         </div>
       </div>
     </section>
@@ -548,6 +560,289 @@ function MapCard({ map }) {
         )}
       </div>
     </div>
+  );
+}
+
+/* ─── Study Area ─── */
+function StudyAreaSection() {
+  const mapRef = useRef(null);
+  const leafletMap = useRef(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [activeBase, setActiveBase] = useState("hybrid");
+  const isMobile = useIsMobile();
+  const baseLayers = useRef({});
+
+  useEffect(() => {
+    if (!mapRef.current || leafletMap.current) return;
+
+    // Inject Leaflet CSS
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+
+    const loadLeaflet = () =>
+      new Promise((resolve) => {
+        if (window.L) { resolve(window.L); return; }
+        const script = document.createElement("script");
+        script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+        script.onload = () => resolve(window.L);
+        document.head.appendChild(script);
+      });
+
+    loadLeaflet().then((L) => {
+      if (leafletMap.current) return;
+
+      const map = L.map(mapRef.current, {
+        zoomControl: true,
+        scrollWheelZoom: true,
+        attributionControl: true,
+      });
+      leafletMap.current = map;
+
+      // Dedicated basemap pane (lower z-index)
+      map.createPane("basemapPane");
+      map.getPane("basemapPane").style.zIndex = 200;
+
+      const googleHybrid = L.tileLayer(
+        "http://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        { pane: "basemapPane", attribution: "© Google", maxZoom: 20 }
+      );
+      const osm = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        { pane: "basemapPane", attribution: "© OpenStreetMap contributors", maxZoom: 19 }
+      );
+
+      baseLayers.current = { hybrid: googleHybrid, osm };
+      googleHybrid.addTo(map);
+
+      // Scale control
+      L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
+
+      // Load study area GeoJSON
+      fetch("https://raw.githubusercontent.com/Hamza-Nkhumbwa/floods/main/rr.geojson")
+        .then((r) => r.json())
+        .then((geojson) => {
+          const studyLayer = L.geoJSON(geojson, {
+            style: {
+              color: "#3b82f6",
+              weight: 2.5,
+              fillColor: "#3b82f6",
+              fillOpacity: 0.12,
+              dashArray: null,
+            },
+            onEachFeature: (feature, layer) => {
+              const props = feature.properties || {};
+              const name = props.NAME || props.name || props.ADM2_EN || "Study Area";
+              layer.bindPopup(
+                `<div style="font-family:system-ui,sans-serif;min-width:160px">
+                  <div style="font-weight:700;font-size:13px;margin-bottom:4px">📍 ${name}</div>
+                  <div style="font-size:11px;color:#555">Lower Shire Valley, Chikwawa District</div>
+                  <div style="font-size:10px;color:#888;margin-top:4px">Flood Risk Study Area · 2026</div>
+                </div>`,
+                { maxWidth: 220 }
+              );
+              layer.on("mouseover", function () {
+                this.setStyle({ fillOpacity: 0.28, weight: 3.5 });
+              });
+              layer.on("mouseout", function () {
+                this.setStyle({ fillOpacity: 0.12, weight: 2.5 });
+              });
+            },
+          }).addTo(map);
+          map.fitBounds(studyLayer.getBounds(), { padding: [40, 40] });
+          setMapReady(true);
+        })
+        .catch(() => {
+          map.setView([-16.05, 34.8], 9);
+          setMapReady(true);
+        });
+    });
+
+    return () => {
+      if (leafletMap.current) {
+        leafletMap.current.remove();
+        leafletMap.current = null;
+      }
+    };
+  }, []);
+
+  const switchBase = (key) => {
+    const L = window.L;
+    if (!L || !leafletMap.current) return;
+    const map = leafletMap.current;
+    Object.entries(baseLayers.current).forEach(([k, layer]) => {
+      if (k === key) { if (!map.hasLayer(layer)) map.addLayer(layer); }
+      else { if (map.hasLayer(layer)) map.removeLayer(layer); }
+    });
+    setActiveBase(key);
+  };
+
+  const stats = [
+    { icon: "📍", label: "Location", value: "Chikwawa District, Malawi" },
+    { icon: "🌊", label: "River", value: "Lower Shire River" },
+    { icon: "📐", label: "Resolution", value: "30m SRTM / Sentinel" },
+    { icon: "🗓", label: "Event", value: "March – April 2026" },
+    { icon: "🌍", label: "Coordinates", value: "−16.05°N, 34.80°E" },
+    { icon: "⚠️", label: "Hazard", value: "Flood & Inundation" },
+  ];
+
+  return (
+    <section style={{ background: "#080f1e", padding: isMobile ? "2rem 1rem" : "4rem 2rem", minHeight: "100vh" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ marginBottom: "1.75rem" }}>
+          <div style={{ color: "#3b82f6", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+            Spatial Context
+          </div>
+          <h2 style={{ color: "#e2e8f0", fontSize: isMobile ? "1.4rem" : "clamp(1.6rem,3vw,2.4rem)", fontWeight: 800, margin: "0 0 0.6rem", letterSpacing: "-0.02em" }}>
+            Study Area
+          </h2>
+          <p style={{ color: "#64748b", fontSize: isMobile ? 13 : 15, lineHeight: 1.75, maxWidth: 640, margin: 0 }}>
+            The Lower Shire Valley, Chikwawa District — one of Malawi's most flood-prone lowland corridors, sitting at the terminus of the Shire River before it enters Mozambique.
+          </p>
+        </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 300px",
+          gap: "1.25rem",
+          alignItems: "start",
+        }}>
+
+          {/* Map column */}
+          <div>
+            {/* Custom basemap toggle */}
+            <div style={{
+              display: "flex", gap: 6, marginBottom: 8,
+            }}>
+              {[
+                { key: "hybrid", label: "🛰 Google Hybrid" },
+                { key: "osm", label: "🗺 OpenStreetMap" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => switchBase(key)}
+                  style={{
+                    background: activeBase === key ? "rgba(59,130,246,0.3)" : "rgba(255,255,255,0.05)",
+                    border: activeBase === key ? "1px solid rgba(59,130,246,0.7)" : "1px solid rgba(255,255,255,0.1)",
+                    color: activeBase === key ? "#93c5fd" : "#64748b",
+                    borderRadius: 8, padding: "6px 14px",
+                    cursor: "pointer", fontSize: 12, fontWeight: 500,
+                    transition: "all 0.2s",
+                  }}
+                >{label}</button>
+              ))}
+            </div>
+
+            {/* Map box */}
+            <div style={{
+              borderRadius: 14, overflow: "hidden",
+              border: "1px solid rgba(59,130,246,0.25)",
+              boxShadow: "0 0 40px rgba(59,130,246,0.1)",
+              height: isMobile ? 380 : 520,
+              position: "relative",
+              background: "#060c18",
+            }}>
+              {!mapReady && (
+                <div style={{
+                  position: "absolute", inset: 0, zIndex: 10,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                  background: "#060c18", color: "#475569",
+                  gap: 10,
+                }}>
+                  <div style={{ fontSize: 32 }}>🌍</div>
+                  <div style={{ fontSize: 13 }}>Loading map…</div>
+                </div>
+              )}
+              <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+            </div>
+
+            {/* Map legend */}
+            <div style={{
+              display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10, alignItems: "center",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, background: "#0d1b2e", border: "1px solid rgba(59,130,246,0.1)", borderRadius: 8, padding: "5px 12px" }}>
+                <div style={{ width: 14, height: 14, borderRadius: 3, background: "rgba(59,130,246,0.25)", border: "2px solid #3b82f6", flexShrink: 0 }} />
+                <span style={{ color: "#94a3b8", fontSize: 12 }}>Study Area Boundary</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#0d1b2e", border: "1px solid rgba(59,130,246,0.1)", borderRadius: 8, padding: "5px 12px" }}>
+                <span style={{ fontSize: 13 }}>💡</span>
+                <span style={{ color: "#475569", fontSize: 11 }}>Click polygons for details · Scroll to zoom</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats sidebar */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <div style={{
+              background: "#0d1b2e", border: "1px solid rgba(59,130,246,0.15)",
+              borderRadius: 12, padding: "1.1rem 1.25rem",
+            }}>
+              <div style={{ color: "#93c5fd", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.9rem" }}>
+                Area Details
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {stats.map(({ icon, label, value }) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
+                    <div>
+                      <div style={{ color: "#475569", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</div>
+                      <div style={{ color: "#cbd5e1", fontSize: 12, fontWeight: 500, marginTop: 1 }}>{value}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Context note */}
+            <div style={{
+              background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.18)",
+              borderRadius: 12, padding: "1rem 1.1rem",
+            }}>
+              <div style={{ color: "#fca5a5", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 7 }}>
+                ⚠ Why This Area?
+              </div>
+              <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.75, margin: 0 }}>
+                Chikwawa District lies in the lowest reach of the Shire valley at elevations below 100m, making it inherently susceptible to riverine flooding. The convergence of low gradient terrain, high population density and seasonal rainfall extremes creates Malawi's most compound flood-risk environment.
+              </p>
+            </div>
+
+            {/* Quick nav */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ color: "#475569", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 2 }}>
+                Explore Analysis
+              </div>
+              {[
+                { label: "→ Thematic Maps", section: "Maps" },
+                { label: "→ AHP Methodology", section: "Methodology" },
+                { label: "→ Findings & Conclusions", section: "Conclusion" },
+              ].map(({ label, section }) => (
+                <button
+                  key={section}
+                  // setActive is not in scope here; use window event
+                  onClick={() => {
+                    // bubble up via custom event
+                    window.dispatchEvent(new CustomEvent("navTo", { detail: section }));
+                  }}
+                  style={{
+                    background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.15)",
+                    color: "#93c5fd", borderRadius: 8, padding: "8px 12px",
+                    cursor: "pointer", fontSize: 12, fontWeight: 500,
+                    textAlign: "left", transition: "all 0.2s",
+                  }}
+                >{label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -729,22 +1024,23 @@ function ConclusionSection() {
   const findings = [
     {
       title: "High-risk zone clearly defined",
+      icon: "🎯",
       body: "The compound flood risk analysis consistently identifies the Illovo corridor and adjacent Shire floodplain as the zone of greatest combined hazard and vulnerability. These areas sit at elevations below 100m, within 300m of major river channels, with slope values under 2°, and contain substantial population and built infrastructure. All seven AHP factors converge to assign maximum or near-maximum scores here."
     },
     {
       title: "Soil saturation amplified the 2026 event",
+      icon: "💧",
       body: "The temporal analysis of Soil Water Index confirms that by late March 2026, soils across the basin had reached near-complete saturation. This condition transformed even moderate rainfall into significant flood-generating episodes — rainfall that would ordinarily infiltrate converted almost entirely to surface runoff, driving the river levels that breached protective embankments near Chikwawa Town.",
-      
     },
     {
       title: "AHP methodology proves fit for purpose",
+      icon: "⚖️",
       body: "The Analytic Hierarchy Process provided a structured, defensible framework for combining incommensurable physical parameters. Elevation received the highest weight (22%) consistent with its dominant control on inundation potential. The consistency ratio was verified within the 0.10 threshold, confirming internal logical coherence.",
-     
     },
     {
       title: "Recommendations for risk reduction",
+      icon: "🛡",
       body: "Priority interventions: (1) Early warning systems tied to SAR-derived soil moisture thresholds — SWI exceeding 0.7 should trigger evacuation preparedness; (2) Flood-resilient resettlement planning for the highest-risk zones around Illovo; (3) Maintaining riparian vegetation to buffer peak flows; (4) Infrastructure design that accounts for the 1-in-5-year inundation envelope.",
-      
     },
   ];
 
@@ -812,14 +1108,56 @@ function Footer() {
   return (
     <footer style={{
       background: "#040810", borderTop: "1px solid rgba(59,130,246,0.1)",
-      padding: isMobile ? "1.5rem 1rem" : "2rem", textAlign: "center",
+      padding: isMobile ? "2rem 1rem" : "2.5rem 2rem",
     }}>
-      <div style={{ color: "#1d4ed8", fontSize: 18, marginBottom: 6 }}>💧</div>
-      <div style={{ color: "#475569", fontSize: isMobile ? 11 : 13 }}>
-        Lower Shire Flood Risk Assessment · Chikwawa District, Malawi · 2026
-      </div>
-      <div style={{ color: "#334155", fontSize: isMobile ? 10 : 12, marginTop: 5 }}>
-        Spatial analysis via Google Earth Engine · Sentinel-1/2 · CHIRPS · SRTM
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+          gap: isMobile ? "1.5rem" : "2rem",
+          marginBottom: "1.75rem",
+        }}>
+          {/* Branding */}
+          <div>
+            <div style={{ color: "#1d4ed8", fontSize: 22, marginBottom: 8 }}>💧</div>
+            <div style={{ color: "#cbd5e1", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
+              Lower Shire Flood Intelligence
+            </div>
+            <div style={{ color: "#475569", fontSize: 12, lineHeight: 1.6 }}>
+              Chikwawa District, Malawi · 2026<br />
+              Multi-criteria flood risk mapping via AHP
+            </div>
+          </div>
+
+          {/* Data */}
+          <div>
+            <div style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+              Data Platforms
+            </div>
+            {["Google Earth Engine", "Copernicus Open Access Hub", "USGS Earth Explorer", "WorldPop · CHIRPS · HydroSHEDS"].map(d => (
+              <div key={d} style={{ color: "#475569", fontSize: 12, marginBottom: 4 }}>{d}</div>
+            ))}
+          </div>
+
+          {/* Method */}
+          <div>
+            <div style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+              Methodology
+            </div>
+            {["Analytic Hierarchy Process (AHP)", "Sentinel-1 SAR · SWI", "Sentinel-2 NDMI / NDVI", "SRTM 30m DEM · CHIRPS Daily"].map(d => (
+              <div key={d} style={{ color: "#475569", fontSize: 12, marginBottom: 4 }}>{d}</div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ borderTop: "1px solid rgba(59,130,246,0.08)", paddingTop: "1.25rem", textAlign: "center" }}>
+          <div style={{ color: "#334155", fontSize: isMobile ? 10 : 11 }}>
+            Lower Shire Flood Risk Assessment · Chikwawa District, Malawi · 2026 · Nkhumbwa, H.
+          </div>
+          <div style={{ color: "#1e3a5f", fontSize: isMobile ? 9 : 10, marginTop: 4 }}>
+            Spatial analysis via Google Earth Engine · Sentinel-1/2 · CHIRPS · SRTM
+          </div>
+        </div>
       </div>
     </footer>
   );
@@ -828,6 +1166,13 @@ function Footer() {
 /* ─── Root ─── */
 export default function App() {
   const [active, setActive] = useState("Overview");
+
+  useEffect(() => {
+    const handler = (e) => setActive(e.detail);
+    window.addEventListener("navTo", handler);
+    return () => window.removeEventListener("navTo", handler);
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", background: "#080f1e", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
       <NavBar active={active} setActive={setActive} />
@@ -837,6 +1182,7 @@ export default function App() {
           <OverviewSection setActive={setActive} />
         </>
       )}
+      {active === "Study Area" && <StudyAreaSection />}
       {active === "Maps" && <MapsSection />}
       {active === "Methodology" && <MethodologySection />}
       {active === "Conclusion" && <ConclusionSection />}
