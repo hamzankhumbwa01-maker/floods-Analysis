@@ -7,7 +7,6 @@ const maps = [
     id: "dem",
     title: "Digital Elevation Model",
     category: "Terrain",
-    icon: "🏔",
     images: [{ label: null, file: "dem.png" }],
     description:
       "The Digital Elevation Model (DEM) for the Shire Basin captures vertical relief using SRTM 30m resolution data. Red tones indicate the lowest elevations — precisely the zones where floodwaters accumulate. Deep green represents highland terrain above 300m. The Lower Shire valley floor, where Chikwawa District sits, appears in warm reds and oranges, confirming its inherent topographic vulnerability.",
@@ -18,7 +17,6 @@ const maps = [
     id: "population",
     title: "Population Distribution",
     category: "Exposure",
-    icon: "👥",
     images: [{ label: null, file: "population.png" }],
     description:
       "Population distribution derived from WorldPop 100m gridded estimates (2020). Dense clusters in red mark heavily populated areas — predominantly along road corridors and near the Shire River. Illovo and surrounding communities represent significant population concentrations within the highest flood susceptibility zones.",
@@ -29,7 +27,6 @@ const maps = [
     id: "rainfall",
     title: "Rainfall Distribution",
     category: "Hydrology",
-    icon: "🌧",
     images: [{ label: null, file: "rainfall.png" }],
     description:
       "Accumulated rainfall computed from CHIRPS daily data across the January–April 2026 rainy season. Deep blue zones received the highest cumulative totals exceeding 600mm. The spatial pattern reveals orographic enhancement over escarpment zones — a direct driver of the March–April 2026 flooding event.",
@@ -40,7 +37,6 @@ const maps = [
     id: "slope",
     title: "Slope Analysis",
     category: "Terrain",
-    icon: "📐",
     images: [{ label: null, file: "slope.png" }],
     description:
       "Slope derived from the SRTM DEM and expressed in degrees. Flat areas (0–2°) receive the highest hazard class since water stagnates rather than drains. The Shire floodplain dominates with near-zero slopes, meaning any rainfall surplus remains ponded.",
@@ -51,7 +47,6 @@ const maps = [
     id: "swi",
     title: "Soil Water Index",
     category: "Soil Moisture",
-    icon: "💧",
     images: [
       { label: "February 2026", file: "soil water index feb.png" },
       { label: "April 2026", file: "soil water index mar.png" },
@@ -65,7 +60,6 @@ const maps = [
     id: "ndmi",
     title: "Norm. Difference Moisture Index",
     category: "Vegetation",
-    icon: "🌿",
     images: [
       { label: "February 2026", file: "Normalized Difference Vegetation index Feb2026.png" },
       { label: "April 2026", file: "Normalized Difference Vegetation index mar2026.png" },
@@ -79,7 +73,6 @@ const maps = [
     id: "ndvi",
     title: "Norm. Difference Vegetation Index",
     category: "Vegetation",
-    icon: "🌱",
     images: [
       { label: "February 2026", file: "ndvifeb.png" },
       { label: "April 2026", file: "ndviapril.png" },
@@ -93,7 +86,6 @@ const maps = [
     id: "susceptibility",
     title: "Flood Susceptibility",
     category: "Risk Output",
-    icon: "⚠️",
     images: [{ label: null, file: "Flood Susceptibility.png" }],
     description:
       "Flood susceptibility derived using AHP, integrating elevation (22%), rainfall (15%), flow accumulation (18%), river proximity (13%), NDMI (10%), soil moisture (10%) and slope (12%). Red zones represent highest susceptibility. The Illovo sugar estate corridor emerges as the most susceptible zone, consistent with the March–April 2026 event.",
@@ -105,7 +97,6 @@ const maps = [
     id: "risk",
     title: "Flood Risk Map",
     category: "Risk Output",
-    icon: "🚨",
     images: [{ label: null, file: "Flood Risk.png" }],
     description:
       "The final flood risk map combines susceptibility (60%) with social vulnerability (40%), integrating population density, land cover, building density and road proximity. Communities around Illovo and along the Shire floodplain emerge with the highest composite risk scores.",
@@ -117,7 +108,6 @@ const maps = [
     id: "timeseries",
     title: "Soil Moisture Time Series",
     category: "Temporal Analysis",
-    icon: "📈",
     images: [{ label: null, file: "time series.png" }],
     description:
       "The temporal profile of soil moisture from February through April 2026 reveals progressive saturation. Values rose sharply following intense rainfall in late February and March, peaked in late March coinciding with the major flooding episode, then showed slight recovery as rainfall diminished in April.",
@@ -404,12 +394,12 @@ function HeroSection({ setActive }) {
 function OverviewSection({ setActive }) {
   const isMobile = useIsMobile();
   const details = [
-    { label: "Study Area", value: "Chikwawa District, Lower Shire", icon: "📍" },
-    { label: "Analysis Period", value: "February – April 2026", icon: "📅" },
-    { label: "Satellite Data", value: "Sentinel-1, Sentinel-2, SRTM, CHIRPS", icon: "🛰" },
-    { label: "Spatial Resolution", value: "30 metre pixels", icon: "🔍" },
-    { label: "Risk Classes", value: "1 (Low) to 5 (Very High)", icon: "⚠️" },
-    { label: "Weighting Method", value: "Analytic Hierarchy Process (AHP)", icon: "⚖️" },
+    { label: "Study Area", value: "Chikwawa District, Lower Shire"},
+    { label: "Analysis Period", value: "February – April 2026"},
+    { label: "Satellite Data", value: "Sentinel-1, Sentinel-2, SRTM, CHIRPS"},
+    { label: "Spatial Resolution", value: "30 metre pixels"},
+    { label: "Risk Classes", value: "1 (Low) to 5 (Very High)"},
+    { label: "Weighting Method", value: "Analytic Hierarchy Process (AHP)"},
   ];
 
   return (
@@ -682,12 +672,12 @@ function StudyAreaSection() {
   };
 
   const stats = [
-    { icon: "📍", label: "Location", value: "Chikwawa District, Malawi" },
-    { icon: "🌊", label: "River", value: "Lower Shire River" },
-    { icon: "📐", label: "Resolution", value: "30m SRTM / Sentinel" },
-    { icon: "🗓", label: "Event", value: "March – April 2026" },
-    { icon: "🌍", label: "Coordinates", value: "−16.05°N, 34.80°E" },
-    { icon: "⚠️", label: "Hazard", value: "Flood & Inundation" },
+    {label: "Location", value: "Chikwawa District, Malawi" },
+    {label: "River", value: "Lower Shire River" },
+    {label: "Resolution", value: "30m SRTM / Sentinel" },
+    {label: "Event", value: "March – April 2026" },
+    {label: "Coordinates", value: "−16.05°N, 34.80°E" },
+    {label: "Hazard", value: "Flood & Inundation" },
   ];
 
   return (
@@ -721,8 +711,8 @@ function StudyAreaSection() {
               display: "flex", gap: 6, marginBottom: 8,
             }}>
               {[
-                { key: "hybrid", label: "🛰 Google Hybrid" },
-                { key: "osm", label: "🗺 OpenStreetMap" },
+                { key: "hybrid", label: " Google Hybrid" },
+                { key: "osm", label: " OpenStreetMap" },
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -772,7 +762,7 @@ function StudyAreaSection() {
                 <span style={{ color: "#94a3b8", fontSize: 12 }}>Study Area Boundary</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#0d1b2e", border: "1px solid rgba(59,130,246,0.1)", borderRadius: 8, padding: "5px 12px" }}>
-                <span style={{ fontSize: 13 }}>💡</span>
+                <span style={{ fontSize: 13 }}></span>
                 <span style={{ color: "#475569", fontSize: 11 }}>Click polygons for details · Scroll to zoom</span>
               </div>
             </div>
@@ -990,14 +980,14 @@ function MethodologySection() {
             gap: 8,
           }}>
             {[
-              { src: "USGS SRTM 30m", layer: "Elevation / Slope", icon: "🛰" },
-              { src: "MERIT Hydro v1", layer: "Flow Accumulation", icon: "🌊" },
-              { src: "Copernicus S1 GRD", layer: "Soil Moisture / Flood Extent", icon: "📡" },
-              { src: "Copernicus S2 SR", layer: "NDMI / NDVI", icon: "🌿" },
-              { src: "CHIRPS Daily", layer: "Rainfall Accumulation", icon: "🌧" },
-              { src: "WorldPop 100m", layer: "Population Distribution", icon: "👥" },
-              { src: "ESA WorldCover", layer: "Land Use / Land Cover", icon: "🗺" },
-              { src: "WWF HydroSHEDS", layer: "River Network", icon: "🏞" },
+              { src: "USGS SRTM 30m", layer: "Elevation / Slope"},
+              { src: "MERIT Hydro v1", layer: "Flow Accumulation"},
+              { src: "Copernicus S1 GRD", layer: "Soil Moisture / Flood Extent"},
+              { src: "Copernicus S2 SR", layer: "NDMI / NDVI"},
+              { src: "CHIRPS Daily", layer: "Rainfall Accumulation"},
+              { src: "WorldPop 100m", layer: "Population Distribution"},
+              { src: "ESA WorldCover", layer: "Land Use / Land Cover"},
+              { src: "WWF HydroSHEDS", layer: "River Network"},
             ].map(d => (
               <div key={d.src} style={{
                 background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
@@ -1024,22 +1014,18 @@ function ConclusionSection() {
   const findings = [
     {
       title: "High-risk zone clearly defined",
-      icon: "🎯",
       body: "The compound flood risk analysis consistently identifies the Illovo corridor and adjacent Shire floodplain as the zone of greatest combined hazard and vulnerability. These areas sit at elevations below 100m, within 300m of major river channels, with slope values under 2°, and contain substantial population and built infrastructure. All seven AHP factors converge to assign maximum or near-maximum scores here."
     },
     {
       title: "Soil saturation amplified the 2026 event",
-      icon: "💧",
       body: "The temporal analysis of Soil Water Index confirms that by late March 2026, soils across the basin had reached near-complete saturation. This condition transformed even moderate rainfall into significant flood-generating episodes — rainfall that would ordinarily infiltrate converted almost entirely to surface runoff, driving the river levels that breached protective embankments near Chikwawa Town.",
     },
     {
       title: "AHP methodology proves fit for purpose",
-      icon: "⚖️",
       body: "The Analytic Hierarchy Process provided a structured, defensible framework for combining incommensurable physical parameters. Elevation received the highest weight (22%) consistent with its dominant control on inundation potential. The consistency ratio was verified within the 0.10 threshold, confirming internal logical coherence.",
     },
     {
       title: "Recommendations for risk reduction",
-      icon: "🛡",
       body: "Priority interventions: (1) Early warning systems tied to SAR-derived soil moisture thresholds — SWI exceeding 0.7 should trigger evacuation preparedness; (2) Flood-resilient resettlement planning for the highest-risk zones around Illovo; (3) Maintaining riparian vegetation to buffer peak flows; (4) Infrastructure design that accounts for the 1-in-5-year inundation envelope.",
     },
   ];
